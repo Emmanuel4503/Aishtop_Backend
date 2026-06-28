@@ -20,6 +20,11 @@ from bookings.serializers import (
 )
 from .permissions import IsOwner
 from .serializers import MembershipLevelSerializer, RescheduleBookingRequestSerializer
+from django.db.models import Count, Sum, Q
+from django.db.models.functions import Coalesce
+from decimal import Decimal
+
+
 
 
 # --- Category CRUD Endpoints ---
@@ -592,33 +597,42 @@ def admin_revenue_metrics(request):
     },
     operation_description="Retrieve all registered customer spending history, booking counts, and current wallet details (Owner only)."
 )
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsOwner])
 def admin_customer_metrics(request):
-    """
-    Retrieve registered customers and their spending metrics.
-    """
-    customers = CustomUser.objects.filter(role='customer').order_by('-date_joined')
-    customer_list = []
-    
-    for customer in customers:
-        # Aggregate stats
-        cust_bookings = Booking.objects.filter(user=customer)
-        total_bookings = cust_bookings.count()
-        total_spent = cust_bookings.filter(payment_status='paid').aggregate(total=Sum('total_price'))['total'] or Decimal('0.00')
-        
-        customer_list.append({
-            'user': UserSerializer(customer).data,
-            'total_bookings': total_bookings,
-            'total_spent': float(total_spent)
-        })
-        
-    return Response({
-        'status': 'success',
-        'message': 'Customer metrics retrieved successfully.',
-        'data': customer_list
-    }, status=status.HTTP_200_OK)
+    customers = (
+        CustomUser.objects
+        .filter(role='customer')
+        .annotate(
+            total_bookings=Count('bookings'),
+            total_spent=Coalesce(
+               Sum(
+    'bookings__total_price',
+    filter=Q(bookings__payment_status='paid'),
+   
+),
+                Decimal('0.00')
+            )
+        )
+        .order_by('-date_joined')
+    )
 
+    customer_list = [
+        {
+            "user": UserSerializer(customer).data,
+            "total_bookings": customer.total_bookings,
+            "total_spent": float(customer.total_spent),
+        }
+        for customer in customers
+    ]
+
+    return Response({
+        "status": "success",
+        "message": "Customer metrics retrieved successfully.",
+        "data": customer_list,
+    }, status=status.HTTP_200_OK)
 
 @swagger_auto_schema(
     method='get',
