@@ -603,6 +603,7 @@ def admin_revenue_metrics(request):
 def admin_customer_metrics(request):
     customers = (
         CustomUser.objects
+        .select_related('membership_level')
         .filter(role='customer')
         .annotate(
             total_bookings=Count('bookings'),
@@ -666,18 +667,31 @@ def admin_worker_metrics(request):
     """
     Retrieve worker performance metrics.
     """
-    workers = CustomUser.objects.filter(role='worker').order_by('full_name')
+    workers = CustomUser.objects.select_related('membership_level').filter(role='worker').order_by('full_name')
     worker_list = []
 
-    for worker in workers:
-        completed_bookings = Booking.objects.filter(worker=worker, service_status='completed')
-        completed_jobs = completed_bookings.count() + worker.jobs_completed_override
-        rev_gen = (completed_bookings.aggregate(total=Sum('total_price'))['total'] or Decimal('0.00')) + worker.revenue_generated_override
+    # Fetch completed bookings efficiently
+    completed_bookings = Booking.objects.filter(service_status='completed').prefetch_related('workers')
+    
+    # Store aggregated stats by worker ID to avoid N+1 queries
+    worker_stats = {w.id: {'jobs': w.jobs_completed_override, 'revenue': w.revenue_generated_override} for w in workers}
 
+    for b in completed_bookings:
+        # Include primary worker and M2M workers
+        b_workers = set(w.id for w in b.workers.all())
+        if b.worker_id:
+            b_workers.add(b.worker_id)
+            
+        for w_id in b_workers:
+            if w_id in worker_stats:
+                worker_stats[w_id]['jobs'] += 1
+                worker_stats[w_id]['revenue'] += b.total_price
+
+    for worker in workers:
         worker_list.append({
             'worker': UserSerializer(worker).data,
-            'completed_jobs': completed_jobs,
-            'revenue_generated': float(rev_gen)
+            'completed_jobs': worker_stats[worker.id]['jobs'],
+            'revenue_generated': float(worker_stats[worker.id]['revenue'])
         })
 
     return Response({
@@ -887,17 +901,20 @@ def admin_wallet_metrics(request):
 
     from django.contrib.auth import get_user_model
     User = get_user_model()
-    customers = User.objects.filter(role='customer')
-    total_balance = sum(c.wallet_balance for c in customers)
-    active_wallets = sum(1 for c in customers if c.wallet_balance > 0)
+    
+    aggs = User.objects.filter(role='customer').aggregate(
+        total_balance=Coalesce(Sum('wallet_balance'), Decimal('0.00')),
+        active_wallets=Count('id', filter=Q(wallet_balance__gt=0)),
+        total_customers=Count('id')
+    )
 
     return Response({
         'status': 'success',
         'message': 'Admin wallet metrics retrieved successfully.',
         'data': {
             'transactions': serializer.data,
-            'total_balance': float(total_balance),
-            'total_customers': customers.count(),
-            'active_wallets': active_wallets
+            'total_balance': float(aggs['total_balance']),
+            'total_customers': aggs['total_customers'],
+            'active_wallets': aggs['active_wallets']
         }
     }, status=status.HTTP_200_OK)
