@@ -1,0 +1,32 @@
+# Virtual Environment
+.venv/
+venv/
+env/
+ENV/
+
+# Environment Secrets
+.env
+
+# Database
+db.sqlite3
+
+# Python Compile Artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Django static/media (if any)
+/static/
+/media/
+
+# IDE and OS files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.DS_Store
+Thumbs.db

@@ -1,0 +1,337 @@
+--- PAGE 1 ---
+ 
+SALON MANAGEMENT, BOOKING & MEMBERSHIP SYSTEM 
+Complete System Overview 
+ 
+INTRODUCTION 
+1. CUSTOMER ENTRY (QR CODE / WEBSITE) 
+When a customer enters the salon, they have three ways to begin: 
+• They scan the QR code displayed in the salon, OR 
+• They visit the website address printed under the QR code, OR. 
+ 
+Homepage Features 
+Once on the website, the customer lands on a clean homepage that includes: 
+• Login / Sign Up button 
+• "Book a Service" button 
+• "Schedule Appointment" option 
+• Wallet balance (for logged-in users only) 
+• Promotional banners (flyers, discounts, offers) 
+• Available services (Haircut, Braiding, Gaming, Snooker, etc.) 
+• Announcements (e.g., "20% off this weekend") 
+ 
+2. USER TYPES 
+There are two types of users on the system: 
+ 
+A. Guest Users (Not Logged In) 
+Guests can: 
+• Book services 
+--- PAGE 2 ---
+• Schedule appointments 
+• Pay via cash or transfer 
+Guests do NOT have access to: 
+• A wallet 
+• Membership benefits 
+• Booking history 
+ 
+B. Registered Users (Logged In) 
+They can do everything a Guest user can do, but also have access to: 
+• A personal wallet (deposit and spend) 
+• Membership level (Silver, Gold, or VIP) 
+• Full history of visits and payments 
+• Exclusive membership benefits and discounts 
+ 
+3. USER JOURNEY A — GUEST USER (Not Logged In) 
+ 
+Step 1 — Landing Page 
+The customer scans the QR code or visits the website. 
+They land on the homepage which displays: 
+• Login / Sign Up button 
+• "Book a Service" button 
+• Promotional flyers and banners 
+• Current announcements and offers 
+• List of available services 
+The guest does not need to log in to book a service. 
+ 
+--- PAGE 3 ---
+Step 2 — Select Service 
+The customer clicks "Book a Service". 
+The system displays all available services: 
+• Haircut 
+• Braiding 
+• Shaving 
+• Gaming 
+• Snooker 
+• And any other services added by the owner 
+The customer selects their preferred service and style (if applicable). 
+The system immediately displays the fixed price. 
+ 
+Step 3 — Choose Action 
+The customer is given two options: 
+• Proceed Now (walk-in, serve me today) 
+• Schedule (book an appointment for a later date and time) 
+ 
+Path A1 — Proceed Now 
+The customer selects Proceed Now and moves to Select Payment Method: 
+Option 1 — Transfer (Paystack) 
+• Customer receives an account number 
+• Transfers the exact amount 
+• Payment is auto-confirmed by the system 
+• Ticket is generated 
+Option 2 — Cash 
+• Customer selects cash 
+--- PAGE 4 ---
+• Ticket is generated immediately 
+• Worker collects and confirms payment physically at the point of service 
+ 
+Path A2 — Schedule (Book Appointment) 
+The customer selects Schedule and fills in: 
+• Preferred date 
+• Preferred time 
+• Preferred worker (optional) 
+They then move to Select Payment Method: 
+• Transfer (Paystack) 
+• Cash (confirmed at arrival) 
+After payment, the customer receives an Appointment Ticket containing: 
+• Ticket ID 
+• Date and time 
+• Service booked 
+• Assigned worker 
+ 
+Step 4 — Ticket Generated 
+Whether walk-in or scheduled, the guest receives a ticket with: 
+• Unique Ticket ID 
+• Service details 
+• Worker assigned 
+• Payment status (Paid / Pending) 
+This ticket is shown to the worker before any service begins. 
+ 
+4. USER JOURNEY B — REGISTERED USER (Logged In) 
+--- PAGE 5 ---
+ 
+Step 1 — Sign Up (First Time Only) 
+The customer clicks Sign Up and fills in: 
+• Full name 
+• Email address 
+• Phone number 
+• Password 
+Account is created. They can now log in at any time. 
+ 
+Step 2 — Log In 
+The customer enters their email and password and logs in. 
+ 
+Step 3 — Landing Page (Logged-In View) 
+Once logged in, the customer sees the homepage with additional features: 
+• Wallet — showing current balance 
+• Deposit button 
+• "Book a Service" button 
+• Promotional flyers and banners 
+• Announcements and offers 
+• Membership level badge (Silver / Gold / VIP) 
+ 
+Step 4 — Wallet & Membership 
+Depositing Money 
+The customer clicks Deposit and chooses an amount: 
+• Quick-select buttons: ₦10,000 / ₦25,000 / ₦50,000 / ₦100,000 
+• Or enter a custom amount 
+--- PAGE 6 ---
+• Payment processed via Transfer or Debit and Credit card and many others provided by 
+Paystack 
+• Balance updates instantly in their wallet 
+Membership Levels (Automatic — Based on Total Deposits, you can decide the amount this is 
+just an example) 
+Level Total Deposited 
+Silver ₦10,000 and above 
+Gold ₦50,000 and above 
+VIP ₦100,000 and above 
+Membership Benefits 
+• Small discount on services 
+• Priority booking over guest users 
+• And Many more as you want 
+ 
+Step 5 — Select Service 
+The customer clicks "Book a Service" and sees the full list of services. 
+They select their service and style (if applicable). 
+The system displays the fixed price with any membership discount already applied. 
+ 
+Step 6 — Choose Action 
+Same two options: 
+• Proceed Now (walk-in) 
+• Schedule (appointment) 
+ 
+Path B1 — Proceed Now 
+The customer selects Proceed Now and moves to Select Payment Method: 
+--- PAGE 7 ---
+Option 1 — Wallet 
+• Price is deducted instantly from wallet balance 
+• No external payment needed 
+• Ticket is generated immediately 
+Option 2 — Transfer (Paystack) 
+• Customer receives account number 
+• Transfers exact amount 
+• Auto-confirmed 
+• Ticket generated 
+Option 3 — Cash 
+• Ticket generated 
+• Worker confirms and collects cash at the point of service 
+ 
+Path B2 — Schedule (Book Appointment) 
+The customer selects Schedule and fills in: 
+• Preferred date 
+• Preferred time 
+• Preferred worker (optional) 
+They then move to Select Payment Method: 
+• Wallet (instant deduction) 
+• Transfer (Paystack) 
+• Cash (confirmed at arrival) 
+After payment, the customer receives an Appointment Ticket with: 
+• Ticket ID 
+• Date and time 
+• Service booked 
+--- PAGE 8 ---
+• Worker assigned 
+• Membership level noted 
+ 
+Step 7 — Ticket Generated 
+The registered user receives their ticket with: 
+• Unique Ticket ID 
+• Service details 
+• Worker assigned 
+• Payment status (Paid / Pending) 
+• Membership level 
+From this point forward, both Guest and Registered users follow the exact same Worker 
+Process. 
+ 
+Key Differences — Guest vs Registered User 
+Feature Guest User Registered User 
+Login required No Yes 
+Has wallet No Yes 
+Can pay with wallet No Yes 
+Membership benefits No Yes 
+Booking history saved No Yes 
+Can schedule appointments Yes Yes 
+Can walk in Yes Yes 
+Discount on services No Yes 
+ 
+5. WORKER PROCESS 
+--- PAGE 9 ---
+ 
+Step 7 — Worker Verifies Ticket 
+The customer shows their ticket code to the worker. 
+The worker enters the code into the system and sees: 
+• Customer name 
+• Service requested 
+• Fixed price 
+• Payment status 
+ 
+Step 8 — Cash Collection (If Applicable) 
+If the payment method is cash: 
+• The system displays the exact amount to collect 
+• The worker collects the full payment 
+• The worker clicks "Confirm Payment" 
+The worker does not enter the price manually — the system records the correct amount 
+automatically. 
+ 
+Step 9 — Start Service 
+The worker clicks "Start Service". 
+The system updates the worker's status to Busy. 
+ 
+Step 10 — Complete Service 
+After finishing: 
+• The worker clicks "Complete" 
+• The service is recorded as done 
+• The worker's status returns to Available 
+--- PAGE 10 ---
+ 
+Worker Dashboard Summary 
+Workers can: 
+• Enter and verify ticket codes 
+• View full service details for each customer 
+• Confirm cash payments 
+• Start and complete services 
+Worker statuses are either Available or Busy — the system uses this for auto-assignment. 
+ 
+6. LIVE ACTIVITY DISPLAY 
+The system shows real-time service activity, visible to the owner and optionally on a screen 
+inside the salon: 
+Ticket Worker Status 
+A21 John In Progress 
+A22 — Waiting 
+A23 Mary Assigned 
+The owner can see at any moment: 
+• All active services 
+• Worker activity 
+• Full queue status 
+ 
+7. ADMIN DASHBOARD (OWNER VIEW) 
+The salon owner has full control and visibility across all operations. 
+ 
+Revenue Tracking 
+• Daily, weekly, and monthly totals 
+--- PAGE 11 ---
+• Breakdown by Cash, Transfer, and Wallet payments 
+• Overall total revenue 
+ 
+Customer Tracking 
+• Every visit is recorded 
+• Total number of visits per customer 
+• Full spending history per customer 
+ 
+Worker Performance 
+• Jobs completed per worker 
+• Revenue generated per worker 
+• Activity logs (who did what and when) 
+ 
+Appointment Management 
+• View all upcoming and past bookings 
+• Reschedule or cancel appointments 
+• Track attendance 
+ 
+Wallet Management 
+• Monitor all customer wallet balances 
+• Track all deposits and spending 
+ 
+Transaction Records 
+• Every service and payment is recorded 
+• No deletion allowed — only controlled actions 
+• Full transparency at all times 
+--- PAGE 12 ---
+ 
+Service Management 
+• Add new services 
+• Edit service prices 
+• Remove or update existing services 
+• Organise services into categories (e.g., Hair, Gaming) 
+• Export reports (PDF / Excel) 
+ 
+Promotions & Banners 
+• Upload promotional banners and flyers 
+• Display offers directly on the homepage 
+• Manage active announcements 
+ 
+Newsletter System 
+• Collect customer email addresses 
+• Send promotions and updates 
+• Build long-term customer relationships 
+ 
+Worker Management 
+• Add or remove workers 
+• Monitor daily activity 
+• Track individual performance 
+• Front Desk Attendant activity is tracked separately from service workers 
+ 
+8. CCTV SUPPORT (Optional Enhancement) 
+For the CCTV view we can attach Live Camera View to Dashboard 
+--- PAGE 13 ---
+If CCTV supports IP stream: 
+We can show: 
+•  Live camera feed  
+In admin dashboard 
+ 
+10. BENEFITS TO YOUR BUSINESS 
+Benefit Details 
+Financial Control Eliminates hidden income and under-reporting 
+Clear Records Know your exact income at any time 
+Faster Operations Organised queue and workflow system 
+Customer Experience Structured service with walk-in and booking support for all customers 
+ 
+ 
