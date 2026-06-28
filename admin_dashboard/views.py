@@ -25,8 +25,6 @@ from django.db.models.functions import Coalesce
 from decimal import Decimal
 
 
-
-
 # --- Category CRUD Endpoints ---
 
 @swagger_auto_schema(
@@ -57,7 +55,7 @@ def admin_category_list_create(request):
             'message': 'Service categories retrieved successfully.',
             'data': serializer.data
         }, status=status.HTTP_200_OK)
-        
+
     elif request.method == 'POST':
         serializer = ServiceCategorySerializer(data=request.data)
         if serializer.is_valid():
@@ -103,7 +101,7 @@ def admin_category_detail(request, pk):
             'status': 'error',
             'message': 'Category not found.'
         }, status=status.HTTP_404_NOT_FOUND)
-        
+
     if request.method == 'GET':
         serializer = ServiceCategorySerializer(category)
         return Response({
@@ -111,7 +109,7 @@ def admin_category_detail(request, pk):
             'message': 'Category retrieved successfully.',
             'data': serializer.data
         }, status=status.HTTP_200_OK)
-        
+
     elif request.method == 'PUT':
         serializer = ServiceCategorySerializer(category, data=request.data, partial=True)
         if serializer.is_valid():
@@ -126,7 +124,7 @@ def admin_category_detail(request, pk):
             'message': 'Failed to update category.',
             'errors': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
-        
+
     elif request.method == 'DELETE':
         name = category.name
         category.delete()
@@ -166,7 +164,7 @@ def admin_service_list_create(request):
             'message': 'Services retrieved successfully.',
             'data': serializer.data
         }, status=status.HTTP_200_OK)
-        
+
     elif request.method == 'POST':
         serializer = ServiceSerializer(data=request.data)
         if serializer.is_valid():
@@ -212,7 +210,7 @@ def admin_service_detail(request, pk):
             'status': 'error',
             'message': 'Service not found.'
         }, status=status.HTTP_404_NOT_FOUND)
-        
+
     if request.method == 'GET':
         serializer = ServiceSerializer(service)
         return Response({
@@ -220,7 +218,7 @@ def admin_service_detail(request, pk):
             'message': 'Service retrieved successfully.',
             'data': serializer.data
         }, status=status.HTTP_200_OK)
-        
+
     elif request.method == 'PUT':
         serializer = ServiceSerializer(service, data=request.data, partial=True)
         if serializer.is_valid():
@@ -235,7 +233,7 @@ def admin_service_detail(request, pk):
             'message': 'Failed to update service.',
             'errors': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
-        
+
     elif request.method == 'DELETE':
         name = service.name
         service.delete()
@@ -275,7 +273,7 @@ def admin_membership_list_create(request):
             'message': 'Membership levels retrieved successfully.',
             'data': serializer.data
         }, status=status.HTTP_200_OK)
-        
+
     elif request.method == 'POST':
         serializer = MembershipLevelSerializer(data=request.data)
         if serializer.is_valid():
@@ -321,7 +319,7 @@ def admin_membership_detail(request, pk):
             'status': 'error',
             'message': 'Membership level not found.'
         }, status=status.HTTP_404_NOT_FOUND)
-        
+
     if request.method == 'GET':
         serializer = MembershipLevelSerializer(level)
         return Response({
@@ -329,7 +327,7 @@ def admin_membership_detail(request, pk):
             'message': 'Membership level retrieved successfully.',
             'data': serializer.data
         }, status=status.HTTP_200_OK)
-        
+
     elif request.method == 'PUT':
         serializer = MembershipLevelSerializer(level, data=request.data, partial=True)
         if serializer.is_valid():
@@ -344,7 +342,7 @@ def admin_membership_detail(request, pk):
             'message': 'Failed to update membership level.',
             'errors': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
-        
+
     elif request.method == 'DELETE':
         name = level.name
         level.delete()
@@ -372,20 +370,22 @@ def admin_list_bookings(request):
     """
     List all bookings/tickets in the system.
     """
-    bookings = Booking.objects.filter(payment_status='paid').order_by('-created_at')
-    
+    bookings = Booking.objects.filter(payment_status='paid').select_related(
+        'service', 'worker', 'customer'
+    ).prefetch_related('workers').order_by('-created_at')
+
     # Apply filters
     service_status_filter = request.query_params.get('service_status')
     payment_status_filter = request.query_params.get('payment_status')
     booking_type_filter = request.query_params.get('booking_type')
-    
+
     if service_status_filter:
         bookings = bookings.filter(service_status=service_status_filter)
     if payment_status_filter:
         bookings = bookings.filter(payment_status=payment_status_filter)
     if booking_type_filter:
         bookings = bookings.filter(booking_type=booking_type_filter)
-        
+
     serializer = BookingSerializer(bookings, many=True)
     return Response({
         'status': 'success',
@@ -407,19 +407,21 @@ def admin_reschedule_booking(request, ticket_id):
     Reschedule an appointment.
     """
     try:
-        booking = Booking.objects.get(ticket_id=ticket_id)
+        booking = Booking.objects.select_related(
+            'service', 'worker', 'customer'
+        ).prefetch_related('workers').get(ticket_id=ticket_id)
     except Booking.DoesNotExist:
         return Response({
             'status': 'error',
             'message': 'Booking not found.'
         }, status=status.HTTP_404_NOT_FOUND)
-        
+
     if booking.service_status in ['completed', 'cancelled']:
         return Response({
             'status': 'error',
             'message': f'Cannot reschedule a booking that is already {booking.service_status}.'
         }, status=status.HTTP_400_BAD_REQUEST)
-        
+
     serializer = RescheduleBookingRequestSerializer(data=request.data)
     if not serializer.is_valid():
         return Response({
@@ -427,12 +429,12 @@ def admin_reschedule_booking(request, ticket_id):
             'message': 'Validation failed.',
             'errors': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
-        
+
     booking.scheduled_date = serializer.validated_data['scheduled_date']
     booking.scheduled_time = serializer.validated_data['scheduled_time']
-    booking.booking_type = 'scheduled'  # Force type to scheduled
+    booking.booking_type = 'scheduled'
     booking.save()
-    
+
     return Response({
         'status': 'success',
         'message': f"Booking '{ticket_id}' successfully rescheduled to {booking.scheduled_date} at {booking.scheduled_time}.",
@@ -443,7 +445,7 @@ def admin_reschedule_booking(request, ticket_id):
 @swagger_auto_schema(
     method='post',
     responses={200: BookingSerializer(), 400: "Status Error", 404: "Booking not found"},
-    operation_description="Cancel a booking. Reassings newly available workers if needed (Owner only)."
+    operation_description="Cancel a booking. Reassigns newly available workers if needed (Owner only)."
 )
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsOwner])
@@ -453,19 +455,21 @@ def admin_cancel_booking(request, ticket_id):
     re-enable them to 'available' and try to assign the next waiting walk-in ticket.
     """
     try:
-        booking = Booking.objects.get(ticket_id=ticket_id)
+        booking = Booking.objects.select_related(
+            'service', 'worker', 'customer'
+        ).prefetch_related('workers').get(ticket_id=ticket_id)
     except Booking.DoesNotExist:
         return Response({
             'status': 'error',
             'message': 'Booking not found.'
         }, status=status.HTTP_404_NOT_FOUND)
-        
+
     if booking.service_status in ['completed', 'cancelled']:
         return Response({
             'status': 'error',
             'message': f'Booking is already {booking.service_status}.'
         }, status=status.HTTP_400_BAD_REQUEST)
-        
+
     # Free up all assigned workers
     all_assigned_workers = list(booking.workers.all())
     if booking.worker and booking.worker not in all_assigned_workers:
@@ -480,15 +484,15 @@ def admin_cancel_booking(request, ticket_id):
                 Q(worker=w) | Q(workers=w),
                 service_status__in=['assigned', 'in_progress']
             ).exclude(id=booking.id).exists()
-            
+
             if not active_bookings:
                 w.worker_status = 'available'
                 w.save()
-                
+
                 # Try to auto-assign next waiting walk-in
                 from bookings.views import assign_next_waiting_booking
                 assign_next_waiting_booking(w)
-            
+
     return Response({
         'status': 'success',
         'message': f"Booking '{ticket_id}' successfully cancelled.",
@@ -535,20 +539,17 @@ def admin_revenue_metrics(request):
     today = now.date()
     start_of_week = now - timezone.timedelta(days=7)
     start_of_month = now - timezone.timedelta(days=30)
-    
-    # Calculate revenues of confirmed bookings
+
     paid_bookings = Booking.objects.filter(payment_status='paid')
-    
+
     daily_rev = paid_bookings.filter(created_at__date=today).aggregate(total=Sum('total_price'))['total'] or Decimal('0.00')
     weekly_rev = paid_bookings.filter(created_at__gte=start_of_week).aggregate(total=Sum('total_price'))['total'] or Decimal('0.00')
     monthly_rev = paid_bookings.filter(created_at__gte=start_of_month).aggregate(total=Sum('total_price'))['total'] or Decimal('0.00')
     overall_rev = paid_bookings.aggregate(total=Sum('total_price'))['total'] or Decimal('0.00')
-    
-    # Breakdown
+
     wallet_pay = paid_bookings.filter(payment_method='wallet').aggregate(total=Sum('total_price'))['total'] or Decimal('0.00')
     monnify_pay = paid_bookings.filter(payment_method='monnify').aggregate(total=Sum('total_price'))['total'] or Decimal('0.00')
-    
-    # Calculate successful wallet deposits (credit transactions)
+
     monthly_wallet_deps = WalletTransaction.objects.filter(
         transaction_type='deposit',
         payment_status='success',
@@ -597,8 +598,6 @@ def admin_revenue_metrics(request):
     },
     operation_description="Retrieve all registered customer spending history, booking counts, and current wallet details (Owner only)."
 )
-
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsOwner])
 def admin_customer_metrics(request):
@@ -608,11 +607,10 @@ def admin_customer_metrics(request):
         .annotate(
             total_bookings=Count('bookings'),
             total_spent=Coalesce(
-               Sum(
-    'bookings__total_price',
-    filter=Q(bookings__payment_status='paid'),
-   
-),
+                Sum(
+                    'bookings__total_price',
+                    filter=Q(bookings__payment_status='paid'),
+                ),
                 Decimal('0.00')
             )
         )
@@ -633,6 +631,7 @@ def admin_customer_metrics(request):
         "message": "Customer metrics retrieved successfully.",
         "data": customer_list,
     }, status=status.HTTP_200_OK)
+
 
 @swagger_auto_schema(
     method='get',
@@ -669,18 +668,18 @@ def admin_worker_metrics(request):
     """
     workers = CustomUser.objects.filter(role='worker').order_by('full_name')
     worker_list = []
-    
+
     for worker in workers:
         completed_bookings = Booking.objects.filter(worker=worker, service_status='completed')
         completed_jobs = completed_bookings.count() + worker.jobs_completed_override
         rev_gen = (completed_bookings.aggregate(total=Sum('total_price'))['total'] or Decimal('0.00')) + worker.revenue_generated_override
-        
+
         worker_list.append({
             'worker': UserSerializer(worker).data,
             'completed_jobs': completed_jobs,
             'revenue_generated': float(rev_gen)
         })
-        
+
     return Response({
         'status': 'success',
         'message': 'Worker metrics retrieved successfully.',
@@ -704,7 +703,7 @@ def admin_create_worker(request):
     revenue_generated_override = request.data.get('revenue_generated_override', 0.00)
 
     if not email or not full_name or not password:
-         return Response({
+        return Response({
             'status': 'error',
             'message': 'Email, full name, and password are required.'
         }, status=status.HTTP_400_BAD_REQUEST)
@@ -813,7 +812,9 @@ def admin_assign_worker(request, ticket_id):
     Accepts 'worker_ids' (list of IDs) or 'worker_id' (single ID).
     """
     try:
-        booking = Booking.objects.get(ticket_id=ticket_id)
+        booking = Booking.objects.select_related(
+            'service', 'worker', 'customer'
+        ).prefetch_related('workers').get(ticket_id=ticket_id)
     except Booking.DoesNotExist:
         return Response({
             'status': 'error',
@@ -823,20 +824,18 @@ def admin_assign_worker(request, ticket_id):
     worker_ids = request.data.get('worker_ids')
     worker_id = request.data.get('worker_id')
 
-    # Standardize input to list of worker IDs
     ids_list = []
     if isinstance(worker_ids, list):
         ids_list = worker_ids
     elif worker_id:
         ids_list = [worker_id]
-        
+
     if not ids_list:
         return Response({
             'status': 'error',
             'message': 'At least one worker ID is required.'
         }, status=status.HTTP_400_BAD_REQUEST)
 
-    # Get new workers
     new_workers = CustomUser.objects.filter(id__in=ids_list, role='worker')
     if not new_workers.exists():
         return Response({
@@ -844,32 +843,27 @@ def admin_assign_worker(request, ticket_id):
             'message': 'No valid workers found with the provided IDs.'
         }, status=status.HTTP_404_NOT_FOUND)
 
-    # Keep track of old workers to free them up
     old_workers = list(booking.workers.all())
     if booking.worker and booking.worker not in old_workers:
         old_workers.append(booking.worker)
 
-    # Assign new workers
     new_workers_list = list(new_workers)
     booking.workers.set(new_workers_list)
-    booking.worker = new_workers_list[0]  # Set primary worker for legacy views
+    booking.worker = new_workers_list[0]
     booking.service_status = 'assigned'
     booking.save()
 
-    # Set new workers to busy
     for worker in new_workers_list:
         worker.worker_status = 'busy'
         worker.save()
 
-    # Free up old workers who are no longer assigned to this booking
     for old_w in old_workers:
         if old_w not in new_workers_list:
-            # Check if this worker is busy on any other active bookings
             is_still_busy = Booking.objects.filter(
                 Q(worker=old_w) | Q(workers=old_w),
                 service_status__in=['assigned', 'in_progress']
             ).exclude(id=booking.id).exists()
-            
+
             if not is_still_busy:
                 old_w.worker_status = 'available'
                 old_w.save()
@@ -890,14 +884,13 @@ def admin_wallet_metrics(request):
     """
     transactions = WalletTransaction.objects.all().order_by('-created_at')
     serializer = WalletTransactionSerializer(transactions, many=True)
-    
-    # Also calculate total balance and metrics
+
     from django.contrib.auth import get_user_model
     User = get_user_model()
     customers = User.objects.filter(role='customer')
     total_balance = sum(c.wallet_balance for c in customers)
     active_wallets = sum(1 for c in customers if c.wallet_balance > 0)
-    
+
     return Response({
         'status': 'success',
         'message': 'Admin wallet metrics retrieved successfully.',
