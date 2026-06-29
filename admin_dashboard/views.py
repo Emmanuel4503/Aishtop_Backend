@@ -603,7 +603,6 @@ def admin_revenue_metrics(request):
 def admin_customer_metrics(request):
     customers = (
         CustomUser.objects
-        .select_related('membership_level')
         .filter(role='customer')
         .annotate(
             total_bookings=Count('bookings'),
@@ -667,7 +666,7 @@ def admin_worker_metrics(request):
     """
     Retrieve worker performance metrics.
     """
-    workers = CustomUser.objects.select_related('membership_level').filter(role='worker').order_by('full_name')
+    workers = CustomUser.objects.filter(role='worker').order_by('full_name')
     worker_list = []
 
     # Fetch completed bookings efficiently
