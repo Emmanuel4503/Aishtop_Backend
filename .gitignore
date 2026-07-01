@@ -6,6 +6,7 @@ ENV/
 
 # Environment Secrets
 .env
+.env.example
 
 # Database
 db.sqlite3
